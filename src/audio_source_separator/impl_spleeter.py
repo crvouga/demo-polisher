@@ -4,7 +4,7 @@ from typing import List, Optional
 from src.audio_source_separator.inter import AudioSourceSeparator
 
 
-class DemucsSeparator(AudioSourceSeparator):
+class SpleeterSeparator(AudioSourceSeparator):
     def __init__(self):
         self.default_stems = ["vocals", "drums", "bass", "other"]
 
