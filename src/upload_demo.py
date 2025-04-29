@@ -4,6 +4,7 @@ import requests
 from starlette.datastructures import URL
 from fastapi.responses import RedirectResponse
 from audio_source_separator.inter import AudioSourceSeparator
+from kv.factory import KvFactory
 from object_storage.inter import ObjectStorage
 from src.audio_source_separator.factory import AudioSourceSeparatorFactory
 from src.object_storage.factory import ObjectStorageFactory
@@ -51,7 +52,7 @@ async def post(request: Request, audio_demo_file: UploadFile = File(...)):
     logger.info(f"Base URL from request: {base_url}")
 
     storage = ObjectStorageFactory.create(
-        type="local",
+        impl="local",
         base_dir=f"{BASE_DIR}/demos",
         base_url=f"{base_url}",
         router=router,
@@ -59,8 +60,12 @@ async def post(request: Request, audio_demo_file: UploadFile = File(...)):
     )
     logger.info(f"Created local storage with base directory: {BASE_DIR}/demos")
 
+    kv = KvFactory.create(impl="dict")
+
+    # upload_record_db = UploadRecordDbFactory.create()
+
     audio_source_separator = AudioSourceSeparatorFactory.create(
-        type="demucs", logger=logger
+        impl="demucs", logger=logger
     )
     logger.info("Created Demucs audio source separator")
 

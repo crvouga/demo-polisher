@@ -13,7 +13,7 @@ class ObjectStorageFactory:
     }
 
     @classmethod
-    def create(cls, type: Literal["local"], **kwargs) -> ObjectStorage:
+    def create(cls, impl: Literal["local"], **kwargs) -> ObjectStorage:
         """
         Create an instance of the specified object storage.
 
@@ -28,10 +28,10 @@ class ObjectStorageFactory:
         Raises:
             ValueError: If the storage type is not supported
         """
-        if type not in cls._storage_types:
+        if impl not in cls._storage_types:
             raise ValueError(
-                f"Unsupported storage type: {type}. "
+                f"Unsupported storage type: {impl}. "
                 f"Supported types are: {', '.join(cls._storage_types.keys())}"
             )
 
-        return cls._storage_types[type](**kwargs)
+        return cls._storage_types[impl](**kwargs)
