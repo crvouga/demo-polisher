@@ -1,5 +1,7 @@
 import logging
-from fastapi import File, UploadFile, APIRouter
+from fastapi import File, UploadFile, APIRouter, Request
+import requests
+from starlette.datastructures import URL
 from fastapi.responses import RedirectResponse
 from src.audio_source_separator.factory import AudioSourceSeparatorFactory
 from src.object_storage.factory import ObjectStorageFactory
@@ -40,11 +42,19 @@ BASE_DIR = "files"
 
 
 @router.post("/")
-async def post(audio_demo_file: UploadFile = File(...)):
+async def post(request: Request, audio_demo_file: UploadFile = File(...)):
     logger = logging.getLogger(__name__)
     logger.info(f"Processing upload for file: {audio_demo_file.filename}")
+    base_url = str(URL(scope=request.scope).replace(path="", query=""))
+    logger.info(f"Base URL from request: {base_url}")
 
-    storage = ObjectStorageFactory.create(type="local", base_dir=f"{BASE_DIR}/demos")
+    storage = ObjectStorageFactory.create(
+        type="local",
+        base_dir=f"{BASE_DIR}/demos",
+        base_url=f"{base_url}",
+        router=router,
+        logger=logger,
+    )
     logger.info(f"Created local storage with base directory: {BASE_DIR}/demos")
 
     audio_source_separator = AudioSourceSeparatorFactory.create(
@@ -61,14 +71,28 @@ async def post(audio_demo_file: UploadFile = File(...)):
     logger.info(f"Uploaded file to storage: {object_name}")
 
     logger.info(f"Starting audio source separation for: {filename}")
-    audio_source_separator.separate(
-        input_file=storage.get_url(object_name),
-        output_dir=f"{BASE_DIR}/demos/separated",
-    )
+    file_url = storage.get_url(object_name)
+
+    logger.info(f"Downloading file from storage: {file_url}")
+
+    # input_file = f"{BASE_DIR}/demos/{filename}"
+    # download_file(file_url, input_file)
+
+    # audio_source_separator.separate(
+    #     input_file=input_file,
+    #     output_dir=f"{BASE_DIR}/demos/separated",
+    # )
+
     logger.info(f"Completed audio source separation for: {filename}")
 
     logger.info(f"Redirecting to result page")
     return RedirectResponse(url=f"{router.prefix}/result", status_code=303)
+
+
+def download_file(file_url: str, filename: str):
+    response = requests.get(file_url)
+    with open(filename, "wb") as f:
+        f.write(response.content)
 
 
 @router.get("/result")

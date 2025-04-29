@@ -10,42 +10,28 @@ class SpleeterSeparator(AudioSourceSeparator):
         self.default_stems = ["vocals", "drums", "bass", "other"]
         self.logger = logger or logging.getLogger(__name__)
 
-    def separate(
-        self,
-        input_file: str,
-        output_dir: str,
-        output_filename: Optional[str] = None,
-        stem_names: Optional[List[str]] = None,
-    ):
-        if output_filename is None:
-            output_filename = os.path.splitext(os.path.basename(input_file))[0]
+    def separate(self, input_file: str, output_dir: str):
+        # Ensure input file exists
+        if not os.path.exists(input_file):
+            raise FileNotFoundError(f"Input file not found: {input_file}")
 
-        if stem_names is None:
-            stem_names = self.default_stems
-
-        # Determine the Spleeter model based on number of stems
-        num_stems = len(stem_names)
-        if num_stems == 2:
-            model = "2stems"
-        elif num_stems == 4:
-            model = "4stems"
-        elif num_stems == 5:
-            model = "5stems"
-        else:
-            model = "4stems"  # Default to 4 stems if not standard configuration
-
-        self.logger.info(f"Separating {input_file} using Spleeter with {model} model")
-
+        # Create output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
 
-        subprocess.run(
-            ["spleeter", "separate", "-p", model, "-o", output_dir, input_file],
-            check=True,
-        )
+        # Get the absolute paths to ensure proper handling
+        abs_input = os.path.abspath(input_file)
+        abs_output = os.path.abspath(output_dir)
 
-        # Spleeter creates a subdirectory with the input filename
-        # We may need to rename files to match expected format
-        input_basename = os.path.splitext(os.path.basename(input_file))[0]
-        spleeter_output_dir = os.path.join(output_dir, input_basename)
+        self.logger.info(f"Separating {abs_input} using Spleeter")
 
-        self.logger.info(f"Separation complete. Files saved to {spleeter_output_dir}")
+        try:
+            subprocess.run(
+                ["spleeter", "separate", "-p", "4stems", "-o", abs_output, abs_input],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            self.logger.info(f"Separation complete. Files saved to {abs_output}")
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Spleeter separation failed: {e.stderr}")
+            raise
