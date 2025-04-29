@@ -3,6 +3,8 @@ from fastapi import File, UploadFile, APIRouter, Request
 import requests
 from starlette.datastructures import URL
 from fastapi.responses import RedirectResponse
+from audio_source_separator.inter import AudioSourceSeparator
+from object_storage.inter import ObjectStorage
 from src.audio_source_separator.factory import AudioSourceSeparatorFactory
 from src.object_storage.factory import ObjectStorageFactory
 import src.document as document
