@@ -3,6 +3,7 @@
     "Demucs",
     "enctype",
     "fastapi",
+    "libsndfile",
     "pycache",
     "spleeter",
     "uvicorn",
