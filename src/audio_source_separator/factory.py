@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Type, Literal, Union
 from src.audio_source_separator.inter import AudioSourceSeparator
 from src.audio_source_separator.impl_spleeter import SpleeterSeparator
@@ -12,7 +13,9 @@ class AudioSourceSeparatorFactory:
 
     @classmethod
     def create(
-        cls, separator_type: Union[Literal["spleeter"], Literal["demucs"]]
+        cls,
+        type: Union[Literal["spleeter"], Literal["demucs"]],
+        logger: logging.Logger,
     ) -> AudioSourceSeparator:
         """
         Create an instance of the specified audio source separator.
@@ -26,10 +29,10 @@ class AudioSourceSeparatorFactory:
         Raises:
             ValueError: If the separator type is not supported
         """
-        if separator_type not in cls._separators:
+        if type not in cls._separators:
             raise ValueError(
-                f"Unsupported separator type: {separator_type}. "
+                f"Unsupported separator type: {type}. "
                 f"Supported types are: {', '.join(cls._separators.keys())}"
             )
 
-        return cls._separators[separator_type]()
+        return cls._separators[type](logger)

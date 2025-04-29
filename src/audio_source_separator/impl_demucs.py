@@ -1,42 +1,32 @@
+import logging
 import subprocess
 import os
-from typing import List, Optional
+from typing import List
 from src.audio_source_separator.inter import AudioSourceSeparator
 
 
 class DemucsSeparator(AudioSourceSeparator):
-    def __init__(self):
+    def __init__(self, logger: logging.Logger):
         self.default_stems = ["drums", "other"]
+        self.logger = logger
 
-    def separate(
-        self,
-        input_file: str,
-        output_dir: str,
-        output_filename: str = None,
-        stem_names: Optional[List[str]] = None,
-    ):
-        if output_filename is None:
-            output_filename = os.path.splitext(os.path.basename(input_file))[0]
+    def separate(self, input_file: str, output_dir: str):
+        output_filename = os.path.splitext(os.path.basename(input_file))[0]
+        self.logger.info(f"Separating {input_file} using Demucs")
 
-        if stem_names is None:
-            stem_names = self.default_stems
-
-        # Demucs only supports two stems, so we'll use the first two specified stems
-        stems_to_separate = stem_names[:2]
-        stem_arg = (
-            f"--two-stems={stems_to_separate[0]}"
-            if len(stems_to_separate) == 2
-            else f"--two-stems={stems_to_separate[0]}"
-        )
+        os.makedirs(output_dir, exist_ok=True)
 
         subprocess.run(
             [
                 "demucs",
-                stem_arg,
+                "--two-stems=drums",
                 "--out",
                 output_dir,
                 "--filename",
                 f"{output_filename}_{{stem}}.wav",
                 input_file,
-            ]
+            ],
+            check=True,
         )
+
+        self.logger.info(f"Separation complete. Files saved to {output_dir}")

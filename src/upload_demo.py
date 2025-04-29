@@ -44,10 +44,12 @@ async def post(audio_demo_file: UploadFile = File(...)):
     logger = logging.getLogger(__name__)
     logger.info(f"Processing upload for file: {audio_demo_file.filename}")
 
-    storage = ObjectStorageFactory.create("local", base_dir=f"{BASE_DIR}/demos")
+    storage = ObjectStorageFactory.create(type="local", base_dir=f"{BASE_DIR}/demos")
     logger.info(f"Created local storage with base directory: {BASE_DIR}/demos")
 
-    audio_source_separator = AudioSourceSeparatorFactory.create("demucs")
+    audio_source_separator = AudioSourceSeparatorFactory.create(
+        type="demucs", logger=logger
+    )
     logger.info("Created Demucs audio source separator")
 
     file_content = await audio_demo_file.read()
@@ -62,8 +64,6 @@ async def post(audio_demo_file: UploadFile = File(...)):
     audio_source_separator.separate(
         input_file=storage.get_url(object_name),
         output_dir=f"{BASE_DIR}/demos/separated",
-        output_filename=filename,
-        stem_names=["vocals", "drums", "bass", "other"],
     )
     logger.info(f"Completed audio source separation for: {filename}")
 
