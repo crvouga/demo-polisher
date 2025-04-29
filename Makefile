@@ -3,3 +3,7 @@ dev:
 
 run:
 	uvicorn main:app
+
+
+freeze:
+	pip freeze > requirements.txt

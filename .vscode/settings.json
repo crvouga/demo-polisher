@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["enctype", "fastapi", "pycache", "uvicorn", "venv"]
+  "cSpell.words": [
+    "Demucs",
+    "enctype",
+    "fastapi",
+    "pycache",
+    "spleeter",
+    "uvicorn",
+    "venv"
+  ]
 }
