@@ -34,10 +34,13 @@ async def get() -> str:
     )
 
 
+BASE_DIR = "files"
+
+
 @router.post("/")
 async def post(audio_demo_file: UploadFile = File(...)):
 
-    storage = ObjectStorageFactory.create("local", base_dir="uploads")
+    storage = ObjectStorageFactory.create("local", base_dir=f"{BASE_DIR}/demos")
 
     file_content = await audio_demo_file.read()
     filename = audio_demo_file.filename
