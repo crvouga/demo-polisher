@@ -12,3 +12,8 @@ install:
 
 preview:
 	docker build -t demo-polisher . && docker run -p 8000:8000 demo-polisher
+
+
+test:
+	clear
+	pytest
